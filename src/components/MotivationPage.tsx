@@ -3,14 +3,43 @@ import { Heart, Sparkles, Moon, Wind, Leaf, Sun, Shield, Star, Compass, Flower2 
 import { useState, useEffect, useRef } from "react";
 import { useSoundEffects } from "../hooks/useSoundEffects";
 
-const FallingPetal = ({ delay = 0, x = 0, duration = 10 }: { delay?: number; x?: number; duration?: number; key?: any }) => (
+const FallingPetal = ({ 
+  delay = 0, 
+  x = 0, 
+  duration = 10, 
+  size = 15, 
+  swing = 10,
+  rotationSpeed = 360
+}: { 
+  delay?: number; 
+  x?: number; 
+  duration?: number; 
+  size?: number;
+  swing?: number;
+  rotationSpeed?: number;
+}) => (
   <motion.div
-    initial={{ y: "-10vh", x: `${x}vw`, opacity: 0, rotate: 0 }}
+    initial={{ 
+      y: "-10vh", 
+      x: `${x}vw`, 
+      opacity: 0, 
+      rotate: 0,
+      scale: 0.5,
+      filter: "blur(4px)"
+    }}
     animate={{ 
       y: "110vh", 
-      x: [`${x}vw`, `${x + 10}vw`, `${x - 5}vw`, `${x + 5}vw`],
+      x: [
+        `${x}vw`, 
+        `${x + swing}vw`, 
+        `${x - swing * 0.5}vw`, 
+        `${x + swing * 0.8}vw`,
+        `${x - swing * 0.2}vw`
+      ],
       opacity: [0, 1, 1, 0],
-      rotate: [0, 180, 360, 540]
+      rotate: [0, rotationSpeed * 0.5, rotationSpeed, rotationSpeed * 1.5],
+      scale: [0.5, 1.1, 0.9, 1.2, 0.8],
+      filter: ["blur(3px)", "blur(0px)", "blur(1px)", "blur(0px)", "blur(2px)"]
     }}
     transition={{ 
       duration, 
@@ -18,9 +47,9 @@ const FallingPetal = ({ delay = 0, x = 0, duration = 10 }: { delay?: number; x?:
       delay,
       ease: "linear"
     }}
-    className="fixed pointer-events-none z-0 text-sakura-pink/40"
+    className="fixed pointer-events-none z-0 text-sakura-pink/30 mix-blend-screen"
   >
-    <Flower2 size={Math.random() * 15 + 10} fill="currentColor" />
+    <Flower2 size={size} fill="currentColor" />
   </motion.div>
 );
 
@@ -113,15 +142,18 @@ const SakuraBreath = () => {
 
 export default function MotivationPage() {
   const containerRef = useRef(null);
-  const [petals, setPetals] = useState<{ x: number; delay: number; duration: number }[]>([]);
+  const [petals, setPetals] = useState<{ x: number; delay: number; duration: number; size: number; swing: number; rotationSpeed: number }[]>([]);
   const { scrollYProgress } = useScroll();
   const titleOpacity = useTransform(scrollYProgress, [0, 0.1], [1, 0.8]);
 
   useEffect(() => {
-    setPetals(Array.from({ length: 25 }).map(() => ({
+    setPetals(Array.from({ length: 35 }).map(() => ({
       x: Math.random() * 100,
-      delay: Math.random() * 15,
-      duration: Math.random() * 10 + 10
+      delay: Math.random() * 20,
+      duration: Math.random() * 15 + 10,
+      size: Math.random() * 15 + 8,
+      swing: Math.random() * 20 + 5,
+      rotationSpeed: (Math.random() * 360 + 360) * (Math.random() > 0.5 ? 1 : -1)
     })));
   }, []);
 
@@ -145,7 +177,15 @@ export default function MotivationPage() {
       
       {/* Falling Petals */}
       {petals.map((petal, i) => (
-        <FallingPetal key={i} x={petal.x} delay={petal.delay} duration={petal.duration} />
+        <FallingPetal 
+          key={i} 
+          x={petal.x} 
+          delay={petal.delay} 
+          duration={petal.duration}
+          size={petal.size}
+          swing={petal.swing}
+          rotationSpeed={petal.rotationSpeed}
+        />
       ))}
 
       <div className="max-w-5xl mx-auto relative z-10">
